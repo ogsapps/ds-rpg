@@ -8,6 +8,9 @@ Music comes from `music/*.song` via the Toneweft engine behind `USE_TONEWEFT` (`
 `npm run check:music` after audio changes. Do not edit `node_modules/toneweft`; upgrade by
 changing the pinned commit in `package.json`.
 
+The `toneweft` skill in `.claude/skills/toneweft/` is copied from `node_modules/toneweft/skills/`;
+re-copy it after changing the pinned commit. Composing plan: `music/CUES.md`.
+
 ## Balance tuning handoffs (dsh)
 
 Automated tuning passes on this repo have repeatedly met the balance targets by bending the game:

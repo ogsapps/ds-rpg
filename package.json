@@ -34,6 +34,6 @@
     "vite-plugin-pwa": "2.0.0"
   },
   "dependencies": {
-    "toneweft": "github:Old-GenS/toneweft#b56a22726a90b230c19b635d63c77b1138b5c586"
+    "toneweft": "github:Old-GenS/toneweft#a1d147d5da6a108612dd077a66fd0775448fe070"
   }
 }
