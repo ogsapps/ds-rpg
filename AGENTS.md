@@ -1,5 +1,13 @@
 # Emberfall: notes for coding agents
 
+## Music (Toneweft)
+
+Music comes from `music/*.song` via the Toneweft engine behind `USE_TONEWEFT` (`?toneweft` or
+`VITE_TONEWEFT=1`); with the flag off the old sequencer is untouched. Check new songs with
+`npx toneweft check music` and `npx toneweft balance music/<file>`, and run
+`npm run check:music` after audio changes. Do not edit `node_modules/toneweft`; upgrade by
+changing the pinned commit in `package.json`.
+
 ## Balance tuning handoffs (dsh)
 
 Automated tuning passes on this repo have repeatedly met the balance targets by bending the game:

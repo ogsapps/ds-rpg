@@ -19,6 +19,10 @@ npm run balance  # the balance report: tiers × classes, per-stage tables, sweep
 
 Requires Node 20+. Click once anywhere and the music begins (browser autoplay rules).
 
+## Music (Toneweft, experimental)
+
+Add `?toneweft` to the URL to hear music from the [Toneweft](https://github.com/Old-GenS/toneweft) engine instead of the built-in sequencer; without it the game plays and sounds exactly as before. Songs live in `music/` as one looping `.song` per theme, with boss parts on the `boss` layer. Check songs with `npx toneweft check music` and `npx toneweft balance music/<file>`, audition them with `npx toneweft audition music --host`, or test the wired-in path with `npm run check:music`. The dependency is pinned to commit `b56a22726a90b230c19b635d63c77b1138b5c586`.
+
 ## How it plays
 
 - **Pick a hero.** Each class has its own passive, three auto-cast skills, and a charged ultimate.
@@ -49,7 +53,7 @@ Requires Node 20+. Click once anywhere and the music begins (browser autoplay ru
 
 ## Tech
 
-- TypeScript + Vite, no runtime dependencies.
+- TypeScript + Vite, with Toneweft as the one (experimental, opt-in) runtime dependency.
 - Canvas 2D renderer: painted unit sprites over procedural parallax backgrounds, with code-drawn vector fallbacks, particles and floating combat text.
 - Web fonts bundled locally (Cinzel, Cormorant Garamond, Inter) — no external font CDN.
 - Web Audio synthesis: five original generative tracks (one per realm) plus a title/map theme, with reverb, pads, plucked arps, leads and drums; all SFX are synthesized too.

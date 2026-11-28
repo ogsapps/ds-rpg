@@ -15,6 +15,7 @@
     "check:hover": "npm run build && node tools/hovercard-check.mjs",
     "check:fx": "npm run build && node tools/battle-fx-check.mjs",
     "check:guard": "npm run build && node tools/guard-check.mjs",
+    "check:music": "npm run build && node tools/music-check.mjs",
     "check:run": "esbuild tools/run-check.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/run-check/run-check.mjs --log-level=warning && node node_modules/.cache/run-check/run-check.mjs",
     "check:path": "esbuild tools/path-check.ts --bundle --platform=node --format=esm --outfile=node_modules/.cache/path-check/path-check.mjs --log-level=warning && node node_modules/.cache/path-check/path-check.mjs",
     "check:pathui": "npm run build && node tools/path-ui-check.mjs",
@@ -31,5 +32,8 @@
     "typescript": "^5.6.3",
     "vite": "^6.0.5",
     "vite-plugin-pwa": "2.0.0"
+  },
+  "dependencies": {
+    "toneweft": "github:Old-GenS/toneweft#b56a22726a90b230c19b635d63c77b1138b5c586"
   }
 }

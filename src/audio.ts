@@ -1,6 +1,9 @@
 /* Emberfall audio engine — all music and sound is synthesized live with Web Audio.
    No samples, no external files. Each realm has its own scale, tempo and motif. */
 
+import { Engine, parseSong, type Song } from 'toneweft';
+import { USE_TONEWEFT, THEME_SONGS } from './music';
+
 type ThemeId = 'menu' | 'map' | 'ashen' | 'whisper' | 'frost' | 'sanctum' | 'throne';
 
 interface Theme {
@@ -70,6 +73,9 @@ const THEMES: Record<ThemeId, Theme> = {
 
 const midiToFreq = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
 
+// Matches the old sequencer's loudness on the music bus.
+const TONEWEFT_TRIM = 0.92;
+
 class AudioEngine {
   ctx: AudioContext | null = null;
   private master!: GainNode;
@@ -91,6 +97,10 @@ class AudioEngine {
   private timer: number | null = null;
   private intensity = false;
   private started = false;
+  private tw: Engine | null = null;
+  private twTrim!: GainNode;
+  private twSongs = new Map<ThemeId, Song>();
+  private twTheme: ThemeId | null = null;
 
   get ready(): boolean { return this.ctx !== null; }
 
@@ -131,9 +141,19 @@ class AudioEngine {
     this.sfxVerb.gain.value = this.sfxLevel;
     this.sfxVerb.connect(this.reverbGain);
     this.noiseBuf = this.makeNoise(1.5);
+    if (USE_TONEWEFT) {
+      this.twTrim = ctx.createGain();
+      this.twTrim.gain.value = TONEWEFT_TRIM;
+      this.twTrim.connect(this.musicBus);
+      // Toneweft has its own reverb, so it goes straight to the music bus and skips ours.
+      this.tw = new Engine(ctx, { destination: this.twTrim, masterChain: false });
+    }
     if (ctx.state === 'suspended') await ctx.resume();
     this.started = true;
-    if (this.playing) this.startScheduler();
+    if (this.playing) {
+      if (USE_TONEWEFT && this.tw) this.startToneweft(this.currentTheme, this.intensity);
+      else this.startScheduler();
+    }
   }
 
   private makeImpulse(duration: number, decay: number): AudioBuffer {
@@ -180,6 +200,10 @@ class AudioEngine {
     this.playing = true;
     this.step = 0;
     if (!this.ctx) return;
+    if (USE_TONEWEFT) {
+      if (this.tw) this.startToneweft(theme, intensity);
+      return;
+    }
     if (this.timer === null) this.startScheduler();
     this.nextTime = this.ctx.currentTime + 0.15;
   }
@@ -189,6 +213,35 @@ class AudioEngine {
     if (this.timer !== null) {
       clearInterval(this.timer);
       this.timer = null;
+    }
+    this.tw?.pause();
+    this.twTheme = null;
+  }
+
+  private startToneweft(theme: ThemeId, intensity: boolean): void {
+    const tw = this.tw;
+    if (!tw) return;
+    if (theme !== this.twTheme) {
+      let song = this.twSongs.get(theme);
+      if (!song) {
+        const parsed = parseSong(THEME_SONGS[theme]);
+        if (!parsed.ok) {
+          console.error(`toneweft: could not parse the ${theme} song`, parsed.errors);
+          this.startScheduler();
+          return;
+        }
+        song = parsed.song;
+        this.twSongs.set(theme, song);
+      }
+      tw.load(song);
+      const numbered = song.bars.filter((bar) => bar.number >= 1);
+      tw.setLoop({ fromBar: numbered[0].number, toBar: numbered[numbered.length - 1].number });
+      tw.setLayerVolume('boss', intensity ? 1 : 0);
+      tw.play();
+      this.twTheme = theme;
+    } else {
+      tw.setLayerVolume('boss', intensity ? 1 : 0, 1.5);
+      if (!tw.playing) tw.play();
     }
   }
 
@@ -514,4 +567,7 @@ class AudioEngine {
 }
 
 export const audio = new AudioEngine();
+if (new URLSearchParams(location.search).has('audiodebug')) {
+  (window as any).__emberfallAudio = audio;
+}
 export type { ThemeId };
